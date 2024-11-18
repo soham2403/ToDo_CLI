@@ -1,9 +1,12 @@
 package main
 
 func main() {
-	tds := todos{}
-	tds.add("learn go")
-	tds.add("uiasgfi")
-	tds.toogle(0)
-	tds.print()
+	tds := Todos{}
+	storage := NewStorage[Todos]("todos.json")
+	storage.load(&tds)
+
+	cmdFlags := NewCmdFlags()
+	cmdFlags.Execute(&tds)
+
+	storage.save(tds)
 }

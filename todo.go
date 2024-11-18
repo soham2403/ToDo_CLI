@@ -10,27 +10,26 @@ import (
 	"github.com/aquasecurity/table"
 )
 
-type todo struct {
-	title        string
-	completed    bool
-	created_at   time.Time
-	completed_at *time.Time
+type Todo struct {
+	Title       string
+	Completed   bool
+	CreatedAt   time.Time
+	CompletedAt *time.Time
 }
 
-type todos []todo
+type Todos []Todo
 
-func (tds *todos) add(title string) {
-	td := todo{
-		title:        title,
-		completed:    false,
-		created_at:   time.Now(),
-		completed_at: nil,
+func (tds *Todos) add(title string) {
+	td := Todo{
+		Title:     title,
+		Completed: false,
+		CreatedAt: time.Now(),
 	}
 	*tds = append(*tds, td)
 }
 
-func (tds *todos) validate_index(id int) error {
-	if id < 0 || id > len(*tds) {
+func (tds *Todos) validate_index(id int) error {
+	if id < 0 || id >= len(*tds) {
 		err := errors.New("invalid index")
 		fmt.Println(err)
 		return err
@@ -38,58 +37,58 @@ func (tds *todos) validate_index(id int) error {
 	return nil
 }
 
-func (tds *todos) delete(id int) error {
+func (tds *Todos) delete(id int) error {
 	t := *tds
 	if err := t.validate_index(id); err != nil {
 		return err
 	}
-
 	*tds = append(t[:id], t[id+1:]...)
 	return nil
 }
 
-func (tds *todos) toogle(id int) error {
+func (tds *Todos) toggle(id int) error {
 	t := *tds
 	if err := t.validate_index(id); err != nil {
 		return err
 	}
-
-	is_completed := t[id].completed
-
+	is_completed := t[id].Completed
 	if !is_completed {
 		completion_time := time.Now()
-		t[id].completed_at = &completion_time
+		t[id].CompletedAt = &completion_time
 	}
-	t[id].completed = !is_completed
+	t[id].Completed = !is_completed
 	return nil
 }
 
-func (tds *todos) update(id int, new_title string) error {
+func (tds *Todos) edit(id int, new_title string) error {
 	t := *tds
 	if err := t.validate_index(id); err != nil {
 		return err
 	}
-
-	t[id].title = new_title
+	t[id].Title = new_title
 	return nil
 }
 
-func (tds *todos) print() {
+func (tds *Todos) print() {
 	table := table.New(os.Stdout)
 	table.SetRowLines(false)
 	table.SetHeaders("#", "Title", "Completed", "Created At", "Completed At")
 	for id, t := range *tds {
 		completed := "❌"
 		completed_at := ""
-
-		if t.completed {
+		if t.Completed {
 			completed = "✅"
-			if t.completed_at != nil {
-				completed_at = t.completed_at.Format(time.RFC1123)
+			if t.CompletedAt != nil {
+				completed_at = t.CompletedAt.Format(time.RFC1123)
 			}
 		}
-
-		table.AddRow(strconv.Itoa(id), t.title, completed, t.created_at.Format(time.RFC1123), completed_at)
+		table.AddRow(
+			strconv.Itoa(id),
+			t.Title,
+			completed,
+			t.CreatedAt.Format(time.RFC1123),
+			completed_at,
+		)
 	}
 	table.Render()
 }
